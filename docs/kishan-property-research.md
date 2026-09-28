@@ -75,7 +75,7 @@ Room service, smoking rooms, air conditioning, power backup, housekeeping, newsp
 - Public listings show different review counts/ratings, which can change and were not used in the website.
 - Public booking policies mention age/ID rules, couple policy, pets, outside food, and other conditions. These were not reproduced as definitive because they require confirmation.
 - Check-in/check-out times differ across listings, so the website omits them.
-- No verified official website or hotel-specific video was identified in the accessible sources.
+- Search found a Facebook page titled “Hotel Kishan (@hotelkishanbettiah) - Videos” (https://www.facebook.com/hotelkishanbettiah/videos/), but scraping the page failed and no individual video URLs/files could be verified. No video is embedded in the website. No verified official standalone website was identified.
 
 ## Scrape coverage and limitations
 
@@ -89,7 +89,7 @@ Room service, smoking rooms, air conditioning, power backup, housekeeping, newsp
 | MakeMyTrip photos page | Scraper returned “200-OK”; listing snippet says +24 property photos and +10 guest photos, but actual asset URLs were not extracted |
 | ClickedIndia contact page | Scraped older address and contact-number variants |
 | Yatra page | Search-indexed listing provides limited check-in/check-out and property claims; full scrape did not complete within the available run |
-| Video sources | No verified property video found in the pages accessed |
+| Video sources | Search surfaced a Facebook videos page for Hotel Kishan, but the page could not be scraped; no individual video URL/file was verified or embedded |
 
 ## Before production launch
 
