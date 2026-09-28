@@ -49,12 +49,14 @@ export const PUBLIC_LISTING_FACTS = {
     { source: "Restaurant Guru", category: "meat dish", url: "https://img02.restaurantguru.com/cbe6-kishan-sweets-and-restaurant-meat.jpg" },
   ],
   videoInventory: [],
+  videoSearch: { facebookPage: "https://www.facebook.com/hotelkishanbettiah/videos/", status: "Page discovered in search; scraping was blocked/failed, so no individual video URLs or assets were verified." },
   sources: [
     "https://www.goibibo.com/hotels/kishan-hotel-in-bettiah-4667815554817029647/",
     "https://www.makemytrip.com/hotels/photos-of-hotel_kishan-details-bettiah.html",
     "https://www.justdial.com/Bettiah/Hotel-Kishan-Opposite-Axix-Bank-Lal-Bazar/9999P6254-6254-180908200923-L6I5_BZDET",
     "https://www.justdial.com/Bettiah/Hotel-Kishan-Opposite-Axix-Bank-Lal-Bazar/9999P6254-6254-180908200923-L6I5_BZDET/gallery?tab=all",
     "https://restaurant-guru.in/Hotel-kishan-Bettiah",
-    "https://restaurant-guru.in/Hotel-kishan-Bettiah/menu"
+    "https://restaurant-guru.in/Hotel-kishan-Bettiah/menu",
+    "https://www.facebook.com/hotelkishanbettiah/videos/"
   ],
 } as const;
