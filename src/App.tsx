@@ -67,29 +67,38 @@ export default function App() {
   const closeMenu = () => setMenuOpen(false);
 
   useEffect(() => {
-    if (activeImage === null) return;
+    if (!menuOpen) return;
+    const handleMenuKey = (event: KeyboardEvent) => { if (event.key === 'Escape') setMenuOpen(false); };
+    window.addEventListener('keydown', handleMenuKey);
+    return () => window.removeEventListener('keydown', handleMenuKey);
+  }, [menuOpen]);
+
+  useEffect(() => {
+    if (activeImage === null && activeRoom === null) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setActiveImage(null);
+      if (event.key === 'Escape') { setActiveImage(null); setActiveRoom(null); }
       if (event.key === 'ArrowRight') setActiveImage((current) => current === null ? null : (current + 1) % gallery.length);
       if (event.key === 'ArrowLeft') setActiveImage((current) => current === null ? null : (current - 1 + gallery.length) % gallery.length);
     };
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeImage]);
+    return () => { window.removeEventListener('keydown', handleKeyDown); document.body.style.overflow = previousOverflow; };
+  }, [activeImage, activeRoom]);
 
   return (
     <div className={night ? 'site night' : 'site'}>
       <a className="skip-link" href="#main-content">Skip to content</a>
       <header className="site-nav">
         <a className="brand" href="#home" aria-label="Kishan Hotel home">KISHAN HOTEL<small>Hospitality, thoughtfully</small></a>
-        <nav className={menuOpen ? 'nav-links open' : 'nav-links'} aria-label="Main navigation">
+        <nav id="primary-navigation" className={menuOpen ? 'nav-links open' : 'nav-links'} aria-label="Main navigation">
           {['Our story', 'Stay', 'Experience', 'Gallery', 'Contact'].map((label, i) => (
             <a key={label} href={['#story', '#rooms', '#experience', '#gallery', '#contact'][i]} onClick={closeMenu}>{label}</a>
           ))}
         </nav>
         <div className="nav-actions">
-          <button className="theme-toggle" onClick={() => setNight(!night)} aria-pressed={night}>{night ? '☼ Day' : '☾ Night'}</button>
-          <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)} aria-expanded={menuOpen} aria-label="Toggle navigation">{menuOpen ? '×' : '☰'}</button>
+          <button className="theme-toggle" type="button" onClick={() => setNight(!night)} aria-label={night ? "Switch to daytime theme" : "Switch to nighttime theme"} aria-pressed={night}>{night ? '☼ Day' : '☾ Night'}</button>
+          <button className="menu-toggle" type="button" onClick={() => setMenuOpen(!menuOpen)} aria-expanded={menuOpen} aria-controls="primary-navigation" aria-label={menuOpen ? "Close navigation" : "Open navigation"}>{menuOpen ? '×' : '☰'}</button>
         </div>
       </header>
 
