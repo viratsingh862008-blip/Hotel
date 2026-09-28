@@ -22,3 +22,27 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 .lightbox-arrow{width:52px;height:52px;font-size:1.5rem;justify-self:center}
 .lightbox-close:hover,.lightbox-arrow:hover{background:#f5f1e9;color:#202720}
 @media(max-width:600px){.lightbox{grid-template-columns:42px minmax(0,1fr) 42px;gap:7px;padding:70px 12px 24px}.lightbox-arrow{width:40px;height:40px}.lightbox figure img{max-height:calc(100svh - 170px)}.lightbox figcaption{font-size:.65rem}}
+
+
+/* Editorial ticker, expandable experience rows, and room details */
+.marquee-strip{overflow:hidden;background:var(--accent);color:#fff;padding:22px 0;white-space:nowrap}
+.marquee-track{display:flex;width:max-content;animation:hotel-marquee 34s linear infinite}
+.marquee-track span{display:flex;align-items:center;gap:28px;padding-right:28px;font:400 clamp(1.1rem,2vw,1.65rem) 'Playfair Display',serif;font-style:italic}
+.marquee-track i{font-style:normal;font-size:.8rem;color:rgba(255,255,255,.7)}
+@keyframes hotel-marquee{to{transform:translateX(-50%)}}
+.marquee-strip:hover .marquee-track{animation-play-state:paused}
+.experience-row{width:100%;border:0;background:transparent;color:var(--ink);text-align:left;cursor:pointer}
+.experience-row span:last-child{min-width:45px;text-align:right}
+.experience-detail{margin:0;padding:0 0 20px;color:var(--muted);font-size:.82rem;line-height:1.8;max-width:470px}
+.room-arrow{border:1px solid var(--line);background:transparent;color:var(--accent);border-radius:50%;width:42px;height:42px;display:grid;place-items:center;cursor:pointer;flex-shrink:0;transition:background .2s,color .2s}
+.room-arrow:hover{background:var(--accent);color:#fff}
+.room-dialog-backdrop{position:fixed;z-index:75;inset:0;display:grid;place-items:center;padding:28px;background:rgba(12,15,12,.78);backdrop-filter:blur(8px)}
+.room-dialog{position:relative;display:grid;grid-template-columns:1fr 1fr;width:min(100%,1000px);max-height:calc(100svh - 56px);overflow:auto;background:var(--paper);color:var(--ink)}
+.room-dialog>img{height:100%;min-height:440px;max-height:760px;object-fit:cover}
+.room-dialog-copy{align-self:center;padding:clamp(28px,5vw,68px)}
+.room-dialog-copy h2{font:400 clamp(2.3rem,4vw,4.4rem)/1 'Playfair Display',serif;margin:22px 0}
+.room-dialog-copy p{color:var(--muted);font-size:.9rem;line-height:1.8}
+.room-dialog-note{margin:28px 0}
+.room-dialog-close{position:absolute;z-index:2;top:14px;right:14px;width:42px;height:42px;border:1px solid var(--line);border-radius:50%;background:var(--paper);color:var(--ink);font-size:1.6rem;cursor:pointer}
+@media(max-width:700px){.room-dialog{grid-template-columns:1fr;max-width:520px}.room-dialog>img{min-height:0;height:48vw;max-height:300px}.room-dialog-copy{padding:28px}.marquee-strip{padding:17px 0}}
+@media(prefers-reduced-motion:reduce){.marquee-track{animation:none;transform:none}}
