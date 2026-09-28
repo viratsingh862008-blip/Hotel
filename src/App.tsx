@@ -19,12 +19,15 @@ const gallery = [
 export default function App() {
   const [night, setNight] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [activeImage, setActiveImage] = useState<number | null>(null);
   const roomsTrack = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const mm = gsap.matchMedia();
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduceMotion) return () => mm.revert();
+    if (reduceMotion) {
+      return () => mm.revert();
+    }
 
     const ctx = gsap.context(() => {
       gsap.from('.hero-content > *', { y: 32, autoAlpha: 0, duration: 1, stagger: 0.13, ease: 'power3.out', delay: 0.12 });
@@ -61,8 +64,20 @@ export default function App() {
   };
   const closeMenu = () => setMenuOpen(false);
 
+  useEffect(() => {
+    if (activeImage === null) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setActiveImage(null);
+      if (event.key === 'ArrowRight') setActiveImage((current) => current === null ? null : (current + 1) % gallery.length);
+      if (event.key === 'ArrowLeft') setActiveImage((current) => current === null ? null : (current - 1 + gallery.length) % gallery.length);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeImage]);
+
   return (
     <div className={night ? 'site night' : 'site'}>
+      <a className="skip-link" href="#main-content">Skip to content</a>
       <header className="site-nav">
         <a className="brand" href="#home" aria-label="Kishan Hotel home">KISHAN HOTEL<small>Hospitality, thoughtfully</small></a>
         <nav className={menuOpen ? 'nav-links open' : 'nav-links'} aria-label="Main navigation">
@@ -76,7 +91,7 @@ export default function App() {
         </div>
       </header>
 
-      <main>
+      <main id="main-content">
         <section className="hero" id="home">
           <div className="hero-image"><img data-parallax src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=2400&q=90" alt="Warm contemporary hotel lounge" /></div>
           <div className="hero-index">A PLACE TO PAUSE · BETTIAH</div>
@@ -106,7 +121,7 @@ export default function App() {
           <div className="wrap section-head"><div><div className="eyebrow reveal">02 / Your room, your rhythm</div><h2 className="reveal">Find your<br /><em>own space.</em></h2></div><p className="reveal">Thoughtfully imagined rooms, generous textures and the little comforts that turn a stay into something personal.</p></div>
           <div className="rooms-pin">
             <div className="rooms-track" ref={roomsTrack}>
-              {rooms.map((room, i) => <article className="room-card" key={room.name}>
+              {rooms.map((room) => <article className="room-card" key={room.name}>
                 <div className="room-image"><img loading="lazy" src={room.image} alt={room.name} /><span className="room-number">{room.type}</span></div>
                 <div className="room-meta"><div><h3>{room.name}</h3><p>{room.note}</p></div><span className="room-arrow">↗</span></div>
               </article>)}
@@ -124,7 +139,7 @@ export default function App() {
 
         <section className="gallery" id="gallery"><div className="wrap">
           <div className="gallery-head"><div><div className="eyebrow reveal">04 / A glimpse inside</div><h2 className="reveal">The art of<br /><em>feeling at home.</em></h2></div><span className="eyebrow">A visual journal / 01—04</span></div>
-          <div className="gallery-grid">{gallery.map(([src, alt], i) => <div className="gallery-item reveal" key={src}><img loading="lazy" src={src} alt={alt} /></div>)}</div>
+          <div className="gallery-grid">{gallery.map(([src, alt], i) => <button className="gallery-item reveal" key={src} type="button" onClick={() => setActiveImage(i)} aria-label={`View larger: ${alt}`}><img loading="lazy" src={src} alt={alt} /><span className="gallery-zoom" aria-hidden="true">↗</span></button>)}</div>
           <div className="gallery-note"><span>Light, texture, atmosphere</span><span>Kishan Hotel · Visual stories</span></div>
         </div></section>
 
@@ -135,6 +150,12 @@ export default function App() {
           <div className="contact-panel reveal"><div className="contact-line"><span>Reservations</span><span>Contact details to be added</span></div><div className="contact-line"><span>Location</span><span>Hotel address to be added</span></div><div className="contact-line"><span>Enquiries</span><a href="#home">Back to the beginning ↗</a></div></div>
         </div></section>
       </main>
+      {activeImage !== null && <div className="lightbox" role="dialog" aria-modal="true" aria-label="Image viewer" onClick={(event) => { if (event.target === event.currentTarget) setActiveImage(null); }}>
+        <button className="lightbox-close" type="button" onClick={() => setActiveImage(null)} aria-label="Close image viewer">×</button>
+        <button className="lightbox-arrow lightbox-prev" type="button" onClick={() => setActiveImage((activeImage - 1 + gallery.length) % gallery.length)} aria-label="Previous image">←</button>
+        <figure><img src={gallery[activeImage][0]} alt={gallery[activeImage][1]} /><figcaption>{gallery[activeImage][1]} <span>{String(activeImage + 1).padStart(2, '0')} / {String(gallery.length).padStart(2, '0')}</span></figcaption></figure>
+        <button className="lightbox-arrow lightbox-next" type="button" onClick={() => setActiveImage((activeImage + 1) % gallery.length)} aria-label="Next image">→</button>
+      </div>}
       <footer className="footer"><span className="footer-brand">Kishan Hotel</span><span>Thoughtful hospitality, always.</span><span>© {new Date().getFullYear()} Kishan Hotel</span></footer>
     </div>
   );
