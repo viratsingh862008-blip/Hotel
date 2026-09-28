@@ -20,6 +20,8 @@ export default function App() {
   const [night, setNight] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeImage, setActiveImage] = useState<number | null>(null);
+  const [activeRoom, setActiveRoom] = useState<number | null>(null);
+  const [expandedExperience, setExpandedExperience] = useState<number | null>(null);
   const roomsTrack = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -93,7 +95,7 @@ export default function App() {
 
       <main id="main-content">
         <section className="hero" id="home">
-          <div className="hero-image"><img data-parallax src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=2400&q=90" alt="Warm contemporary hotel lounge" /></div>
+          <div className="hero-image"><img data-parallax src={night ? "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=2400&q=90" : "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=2400&q=90"} alt="Warm contemporary hotel lounge" /></div>
           <div className="hero-index">A PLACE TO PAUSE · BETTIAH</div>
           <div className="hero-content">
             <div className="eyebrow">An invitation to slow down</div>
@@ -117,13 +119,15 @@ export default function App() {
           <div className="statement-caption"><span>Quiet design. Considered comfort.</span><span>Spaces to simply be.</span></div>
         </section>
 
+        <div className="marquee-strip" aria-label="Kishan Hotel — thoughtful hospitality"><div className="marquee-track" aria-hidden="true">{Array.from({ length: 4 }, (_, index) => <span key={index}>A slower kind of stay <i>✳</i> Thoughtful hospitality <i>✳</i> Room to simply be <i>✳</i></span>)}</div></div>
+
         <section className="rooms" id="rooms">
           <div className="wrap section-head"><div><div className="eyebrow reveal">02 / Your room, your rhythm</div><h2 className="reveal">Find your<br /><em>own space.</em></h2></div><p className="reveal">Thoughtfully imagined rooms, generous textures and the little comforts that turn a stay into something personal.</p></div>
           <div className="rooms-pin">
             <div className="rooms-track" ref={roomsTrack}>
               {rooms.map((room) => <article className="room-card" key={room.name}>
                 <div className="room-image"><img loading="lazy" src={room.image} alt={room.name} /><span className="room-number">{room.type}</span></div>
-                <div className="room-meta"><div><h3>{room.name}</h3><p>{room.note}</p></div><span className="room-arrow">↗</span></div>
+                <div className="room-meta"><div><h3>{room.name}</h3><p>{room.note}</p></div><button className="room-arrow" type="button" onClick={() => setActiveRoom(rooms.findIndex((item) => item.name === room.name))} aria-label={`View details for ${room.name}`}>↗</button></div>
               </article>)}
             </div>
           </div>
@@ -133,7 +137,16 @@ export default function App() {
         <section className="experience" id="experience"><div className="wrap experience-grid">
           <div className="experience-image reveal"><img data-parallax loading="lazy" src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1400&q=85" alt="Peaceful contemporary interior with natural light" /></div>
           <div className="experience-copy"><div className="eyebrow reveal">03 / The experience</div><h2 className="reveal">Made for<br /><em>the in-between.</em></h2><p className="reveal">The unhurried coffee. The pause between plans. The comfort of returning to a space that feels familiar. Discover a stay shaped around the moments that matter to you.</p>
-            <div className="experience-list reveal">{['Warm, personal hospitality', 'Spaces to gather and unwind', 'Thoughtful comforts'].map((item, i) => <div className="experience-row" key={item}><span>{item}</span><span>0{i + 1} ↗</span></div>)}</div>
+            <div className="experience-list reveal">{[
+              { title: 'Warm, personal hospitality', detail: 'A welcoming approach shaped around attentive service and the comfort of feeling at ease.' },
+              { title: 'Spaces to gather and unwind', detail: 'A calm setting to pause, reconnect, and enjoy a slower moment during your stay.' },
+              { title: 'Thoughtful comforts', detail: 'Simple details and considered spaces intended to make time away feel more effortless.' },
+            ].map((item, i) => <div className="experience-accordion" key={item.title}>
+              <button className="experience-row" type="button" onClick={() => setExpandedExperience(expandedExperience === i ? null : i)} aria-expanded={expandedExperience === i}>
+                <span>{item.title}</span><span>{expandedExperience === i ? '−' : '0' + (i + 1) + ' +'}</span>
+              </button>
+              {expandedExperience === i && <p className="experience-detail">{item.detail}</p>}
+            </div>)}</div>
           </div>
         </div></section>
 
@@ -150,6 +163,13 @@ export default function App() {
           <div className="contact-panel reveal"><div className="contact-line"><span>Reservations</span><span>Contact details to be added</span></div><div className="contact-line"><span>Location</span><span>Hotel address to be added</span></div><div className="contact-line"><span>Enquiries</span><a href="#home">Back to the beginning ↗</a></div></div>
         </div></section>
       </main>
+      {activeRoom !== null && <div className="room-dialog-backdrop" role="presentation" onClick={(event) => { if (event.target === event.currentTarget) setActiveRoom(null); }}>
+        <section className="room-dialog" role="dialog" aria-modal="true" aria-labelledby="room-dialog-title">
+          <button className="room-dialog-close" type="button" onClick={() => setActiveRoom(null)} aria-label="Close room details">×</button>
+          <img src={rooms[activeRoom].image} alt={rooms[activeRoom].name} />
+          <div className="room-dialog-copy"><div className="eyebrow">{rooms[activeRoom].type}</div><h2 id="room-dialog-title">{rooms[activeRoom].name}</h2><p>{rooms[activeRoom].note}</p><p className="room-dialog-note">Room specifications and reservation details can be added once confirmed by the hotel.</p><a className="text-link" href="#contact" onClick={() => setActiveRoom(null)}>Make an enquiry ↗</a></div>
+        </section>
+      </div>}
       {activeImage !== null && <div className="lightbox" role="dialog" aria-modal="true" aria-label="Image viewer" onClick={(event) => { if (event.target === event.currentTarget) setActiveImage(null); }}>
         <button className="lightbox-close" type="button" onClick={() => setActiveImage(null)} aria-label="Close image viewer">×</button>
         <button className="lightbox-arrow lightbox-prev" type="button" onClick={() => setActiveImage((activeImage - 1 + gallery.length) % gallery.length)} aria-label="Previous image">←</button>
