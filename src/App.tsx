@@ -72,7 +72,7 @@ function RoomsCarousel() {
   }, [api, sync]);
   return <div className="rooms-carousel">
     <div className="embla-viewport" ref={viewport}><div className="embla-track">{rooms.map((room, i) => <article className="room-card embla-slide" key={room.name}>
-      <div className="room-photo"><img src={room.img} alt={room.name + ' photo from a public listing'} loading="lazy" /><span className="image-tag">Public listing photo · rights to confirm</span><span className="photo-index">0{i + 1} / 05</span></div>
+      <div className="room-photo"><img src={room.img} alt={room.name + ' photo from a public listing'} loading="lazy" /><span className="image-tag">Public listing photo · rights to confirm</span><span className="photo-index">{String(i + 1).padStart(2, '0')} / {String(rooms.length).padStart(2, '0')}</span></div>
       <div className="room-info"><div><small>{room.tag}</small><h3>{room.name}</h3><p>{room.text}</p></div><a href="#enquiry" className="circle-arrow" aria-label={'Enquire about ' + room.name}><ArrowUpRight size={19} /></a></div>
     </article>)}</div></div>
     <div className="carousel-bottom"><span>Swipe through listed room categories</span><div><Button variant="icon" disabled={!prev} onClick={() => api?.scrollPrev()} aria-label="Previous room"><ArrowLeft size={18} /></Button><Button variant="icon" disabled={!next} onClick={() => api?.scrollNext()} aria-label="Next room"><ArrowRight size={18} /></Button></div></div>
@@ -89,7 +89,7 @@ function Gallery() {
   <Dialog open={selected !== null} onOpenChange={o => !o && setSelected(null)}><DialogContent className="lightbox">
     <div className="lightbox-head"><DialogTitle>{selected === null ? 'Gallery' : photos[selected].caption}</DialogTitle><DialogClose className="close-lightbox" aria-label="Close gallery"><X size={20} /></DialogClose></div>
     <DialogDescription className="sr-only">Public listing image. Photo association and reuse permission have not been verified. Use previous and next buttons to browse.</DialogDescription>
-    {selected !== null && <><div className="lightbox-photo"><img src={photos[selected].src} alt={photos[selected].alt} /></div><div className="lightbox-bottom"><span>0{selected + 1} / 0{photos.length} · Public listing photo</span><div><Button variant="icon" onClick={() => change(-1)} aria-label="Previous image"><ArrowLeft size={18} /></Button><Button variant="icon" onClick={() => change(1)} aria-label="Next image"><ArrowRight size={18} /></Button></div></div></>}
+    {selected !== null && <><div className="lightbox-photo"><img src={photos[selected].src} alt={photos[selected].alt} /></div><div className="lightbox-bottom"><span>{String(selected + 1).padStart(2, '0')} / {String(photos.length).padStart(2, '0')} · Public listing photo</span><div><Button variant="icon" onClick={() => change(-1)} aria-label="Previous image"><ArrowLeft size={18} /></Button><Button variant="icon" onClick={() => change(1)} aria-label="Next image"><ArrowRight size={18} /></Button></div></div></>}
   </DialogContent></Dialog>
   </section>;
 }
