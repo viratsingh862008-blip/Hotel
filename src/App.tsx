@@ -240,7 +240,7 @@ export default function App() {
         <div className="page-wrap">
           <div className="hotel-quick-head">
             <Heading n="02" label="Everything in one place" title="Stay, dine," italic="connect." description="The core details a guest needs before and during a stay — rooms, direct enquiry, directions, dining and room assistance." />
-            <a className="whatsapp-cta" href={`https://wa.me/${PUBLIC_LISTING_FACTS.publicContactVariants[0].value.replace(/\\D/g, '')}?text=Hello%20I%20would%20like%20to%20enquire%20about%20a%20room%20at%20Hotel%20Kishan.`} target="_blank" rel="noreferrer">
+            <a className="whatsapp-cta" href={`https://wa.me/${PUBLIC_LISTING_FACTS.publicContactVariants[0].value.replace(/\D/g, '')}?text=Hello%20I%20would%20like%20to%20enquire%20about%20a%20room%20at%20Hotel%20Kishan.`} target="_blank" rel="noreferrer">
               <span>Direct WhatsApp enquiry</span><ArrowUpRight size={17} />
             </a>
           </div>
