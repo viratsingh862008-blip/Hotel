@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
+import { gsap } from 'gsap';
 import { motion, useReducedMotion } from 'motion/react';
 import { ArrowDownRight, ArrowLeft, ArrowRight, ArrowUpRight, BedDouble, Check, Coffee, Copy, Heart, Menu, Moon, Sparkles, Sun, Utensils, X } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './components/ui/accordion';
@@ -94,6 +95,106 @@ function Gallery() {
   </section>;
 }
 
+
+function InteractiveGallery() {
+  const viewportRef = useRef<HTMLDivElement | null>(null);
+  const trackRef = useRef<HTMLDivElement | null>(null);
+  const drag = useRef({ active: false, startX: 0, startOffset: 0, offset: 0 });
+  const [offset, setOffset] = useState(0);
+
+  const getBounds = useCallback(() => {
+    const viewport = viewportRef.current;
+    const track = trackRef.current;
+    if (!viewport || !track) return { min: 0, max: 0 };
+    return { min: Math.min(0, viewport.clientWidth - track.scrollWidth), max: 0 };
+  }, []);
+
+  useEffect(() => {
+    const onResize = () => {
+      const { min, max } = getBounds();
+      setOffset(v => Math.min(max, Math.max(min, v)));
+    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, [getBounds]);
+
+  const moveTo = useCallback((next: number, animate = true) => {
+    const { min, max } = getBounds();
+    const clamped = Math.min(max, Math.max(min, next));
+    setOffset(clamped);
+    if (trackRef.current) {
+      gsap.to(trackRef.current, {
+        x: clamped,
+        duration: animate ? 0.65 : 0,
+        ease: 'power3.out',
+        overwrite: true
+      });
+    }
+  }, [getBounds]);
+
+  const step = useCallback((direction: number) => {
+    const viewport = viewportRef.current;
+    moveTo(offset + direction * Math.max(280, (viewport?.clientWidth ?? 900) * 0.62));
+  }, [moveTo, offset]);
+
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!trackRef.current) return;
+    drag.current = { active: true, startX: e.clientX, startOffset: offset, offset };
+    e.currentTarget.setPointerCapture(e.pointerId);
+    gsap.killTweensOf(trackRef.current);
+    e.currentTarget.classList.add('is-dragging');
+  };
+
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!drag.current.active) return;
+    moveTo(drag.current.startOffset + e.clientX - drag.current.startX, false);
+  };
+
+  const endDrag = () => {
+    drag.current.active = false;
+    if (viewportRef.current) viewportRef.current.classList.remove('is-dragging');
+  };
+
+  return (
+    <section className="section-pad interactive-gallery-section" id="interactive-gallery">
+      <div className="page-wrap">
+        <div className="interactive-gallery-head">
+          <Heading n="04" label="Move through the property" title="See it" italic="in motion." description="Drag the gallery, use the controls, or swipe on mobile. Room, dining, hospitality and exterior imagery are presented as an immersive visual tour." />
+          <div className="interactive-gallery-controls">
+            <Button variant="icon" onClick={() => step(-1)} aria-label="Previous gallery image"><ArrowLeft size={18} /></Button>
+            <Button variant="icon" onClick={() => step(1)} aria-label="Next gallery image"><ArrowRight size={18} /></Button>
+          </div>
+        </div>
+        <div
+          className="gsap-gallery-viewport"
+          ref={viewportRef}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={endDrag}
+          onPointerCancel={endDrag}
+          onPointerLeave={endDrag}
+        >
+          <div className="gsap-gallery-track" ref={trackRef}>
+            {photos.slice(0, 12).map((p, i) => (
+              <article className="gsap-gallery-card" key={p.src + i}>
+                <img src={p.src} alt={p.alt} loading="lazy" draggable={false} />
+                <div className="gsap-gallery-overlay">
+                  <span>0{String(i + 1).slice(-1)}</span>
+                  <strong>{i < 4 ? ['Rooms', 'Suite', 'Bathroom', 'Dining'][i] : p.caption.split(' · ')[0]}</strong>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+        <div className="interactive-gallery-foot">
+          <span>GSAP-powered draggable gallery</span>
+          <span>Drag · Swipe · Explore</span>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function Enquiry() {
   const [form, setForm] = useState({ name: '', dates: '', guests: '2', room: 'Any room type', note: '' });
   const [message, setMessage] = useState('');
@@ -121,7 +222,7 @@ function Enquiry() {
 export default function App() {
   const [night, setNight] = useState(false);
   const [menu, setMenu] = useState(false);
-  const links = [['Story', '#story'], ['Stay', '#stay'], ['Experience', '#experience'], ['Dining', '#dining'], ['Location', '#location'], ['Listing notes', '#listing-notes'], ['Gallery', '#gallery'], ['FAQs', '#faqs']];
+  const links = [['Story', '#story'], ['Stay', '#stay'], ['Experience', '#experience'], ['Dining', '#dining'], ['Location', '#location'], ['Tour', '#interactive-gallery'], ['Gallery', '#gallery'], ['FAQs', '#faqs']];
   return <div className={night ? 'site night' : 'site'}>
     <div className="top-strip"><span>BETTIAH · WEST CHAMPARAN</span><span>Hospitality, thoughtfully considered</span><a href="#enquiry">Plan a visit <ArrowUpRight size={13} /></a></div>
     <header className="site-header"><a href="#home" className="brand" aria-label="Kishan Hotel home"><span className="brand-symbol">K<span>.</span></span><span>KISHAN HOTEL<small>BETTIAH · BIHAR</small></span></a>
@@ -134,6 +235,26 @@ export default function App() {
         <motion.div className="hero-copy" initial={{ opacity: 0, y: 25 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .8, ease: 'easeOut' }}><p className="hero-kicker">A place to stay in Bettiah</p><h1>Arrive.<br /><em>Unwind.</em><br />Feel at home.</h1><div className="hero-bottom"><p>Explore the room categories and dining details found in public listings. Rates, availability, and property information still need direct confirmation.</p><a href="#story">Discover Kishan <span><ArrowDownRight size={19} /></span></a></div></motion.div>
         <div className="hero-foot"><span>SCROLL TO EXPLORE</span><span>PUBLIC LISTING PHOTOS · USAGE RIGHTS TO CONFIRM</span></div>
       </section>
+
+      <section className="section-pad hotel-quick-section" id="hotel-services">
+        <div className="page-wrap">
+          <div className="hotel-quick-head">
+            <Heading n="02" label="Everything in one place" title="Stay, dine," italic="connect." description="The core details a guest needs before and during a stay — rooms, direct enquiry, directions, dining and room assistance." />
+            <a className="whatsapp-cta" href={`https://wa.me/${PUBLIC_LISTING_FACTS.publicContactVariants[0].value.replace(/\\D/g, '')}?text=Hello%20I%20would%20like%20to%20enquire%20about%20a%20room%20at%20Hotel%20Kishan.`} target="_blank" rel="noreferrer">
+              <span>Direct WhatsApp enquiry</span><ArrowUpRight size={17} />
+            </a>
+          </div>
+          <div className="hotel-service-grid">
+            <a href="#stay" className="hotel-service-card"><BedDouble size={21} /><span>Rooms</span><p>Browse room categories and photo references.</p><ArrowUpRight size={17} /></a>
+            <a href="#enquiry" className="hotel-service-card"><Coffee size={21} /><span>Room service</span><p>Ask about room assistance and available services.</p><ArrowUpRight size={17} /></a>
+            <a href="#dining" className="hotel-service-card"><Utensils size={21} /><span>Best foods & dining</span><p>Explore the restaurant and food gallery.</p><ArrowUpRight size={17} /></a>
+            <a href="#location" className="hotel-service-card"><ArrowUpRight size={21} /><span>Maps & directions</span><p>Open the property location and plan your route.</p><ArrowUpRight size={17} /></a>
+            <a href="#experience" className="hotel-service-card"><Heart size={21} /><span>Hospitality</span><p>See the guest services and stay experience.</p><ArrowUpRight size={17} /></a>
+            <a href="#interactive-gallery" className="hotel-service-card"><Sparkles size={21} /><span>Interactive tour</span><p>Move through rooms, dining and property imagery.</p><ArrowUpRight size={17} /></a>
+          </div>
+        </div>
+      </section>
+
       <section className="section-pad story-section" id="story"><div className="page-wrap story-layout"><div className="story-side"><span>01 — THE KISHAN FEELING</span><div><Heart size={20} /><small>MADE FOR<br />YOUR MOMENTS</small></div></div><div className="story-copy"><span className="eyebrow">A stay in Bettiah</span><h2>Some places are<br />more than a <em>stop.</em></h2><div className="story-bottom"><p>Public booking and directory listings place Hotel Kishan on Supriya Cinema Road in Kamalnath Nagar, Bettiah. The exact entrance, current services, and booking process should be confirmed directly with the property.</p><a href="#experience" className="text-link">Explore the experience <ArrowUpRight size={16} /></a></div></div></div></section>
       <section className="wide-photo"><div><img src={PROPERTY_MEDIA.room1.src} alt="Hotel Kishan room photo from a public listing" loading="lazy" /><span className="image-tag">Public listing photo · rights to confirm</span></div><p><span>Hotel room · public listing</span><span>VISUAL DIRECTION / 01</span></p></section>
       <section className="section-pad stay-section" id="stay"><div className="page-wrap"><div className="stay-head"><Heading n="02" label="Find your room" title="A place for" italic="your kind of stay." description="Public booking listings show several room categories. Photos are not matched to a specific room type; confirm current categories, rates, and inclusions with the hotel." /><a href="#enquiry" className="text-link">Ask about a stay <ArrowUpRight size={16} /></a></div><RoomsCarousel /></div></section>
@@ -154,6 +275,7 @@ export default function App() {
           <article><span className="eyebrow">Video search</span><p>A Facebook videos page for Hotel Kishan was discovered, but no individual video file could be retrieved or verified. No video is embedded.</p><a href={PUBLIC_LISTING_FACTS.sources[6]} target="_blank" rel="noreferrer" className="text-link">View discovered video page <ArrowUpRight size={15} /></a></article>
         </div>
       </div></section>
+      <InteractiveGallery />
       <Gallery />
       <section className="section-pad faq-section" id="faqs"><div className="page-wrap faq-layout"><Heading n="06" label="Good to know" title="A few things" italic="before you arrive." description="Clear answers, without assumptions about unverified hotel details." /><Accordion type="single" collapsible className="faq-list">{questions.map(([q, a], i) => <AccordionItem value={String(i)} key={q}><AccordionTrigger><span className="faq-number">0{i + 1}</span>{q}</AccordionTrigger><AccordionContent>{a}</AccordionContent></AccordionItem>)}</Accordion></div></section>
       <section className="section-pad enquiry-section"><div className="page-wrap"><Enquiry /></div></section>
