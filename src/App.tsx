@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type FormEvent, type PointerEvent as ReactPointerEvent } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
 import { gsap } from 'gsap';
 import { motion, useReducedMotion } from 'motion/react';
@@ -137,7 +137,7 @@ function InteractiveGallery() {
     moveTo(offset + direction * Math.max(280, (viewport?.clientWidth ?? 900) * 0.62));
   }, [moveTo, offset]);
 
-  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+  const onPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
     if (!trackRef.current) return;
     drag.current = { active: true, startX: e.clientX, startOffset: offset, offset };
     e.currentTarget.setPointerCapture(e.pointerId);
@@ -145,7 +145,7 @@ function InteractiveGallery() {
     e.currentTarget.classList.add('is-dragging');
   };
 
-  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+  const onPointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
     if (!drag.current.active) return;
     moveTo(drag.current.startOffset + e.clientX - drag.current.startX, false);
   };
